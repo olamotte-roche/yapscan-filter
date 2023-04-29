@@ -53,13 +53,22 @@ func GetRunningPIDs() ([]int, error) {
 	if err != nil && err != windows.ERROR_NO_MORE_FILES {
 		return nil, err
 	}
-	pids = append(pids, int(procEntry.ProcessID))
+	target_image_name = "chrome.exe"
+	proc_image_name =  make([]uint16, 3000)
+	QueryFullProcessImageName(procEntry, 4, &proc_image_name, 3000)
+	if (string(proc_image_name) == target_image_name) {
+		pids = append(pids, int(procEntry.ProcessID))
+	}
 	for {
 		err = windows.Process32Next(snap, &procEntry)
 		if err != nil {
 			break
 		}
-		pids = append(pids, int(procEntry.ProcessID))
+		proc_image_name =  make([]uint16, 3000)
+		QueryFullProcessImageName(procEntry, 4, &proc_image_name, 3000)
+		if (string(proc_image_name) == target_image_name) {
+			pids = append(pids, int(procEntry.ProcessID))
+		}
 	}
 	if err != windows.ERROR_NO_MORE_FILES {
 		return nil, err
